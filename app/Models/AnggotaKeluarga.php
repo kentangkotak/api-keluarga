@@ -40,7 +40,7 @@ class AnggotaKeluarga extends Model
             'hubungan_orang_tua',
             'orang_tua_id',
             'anak_id'
-        )->orderBy('anggota_keluarga.id');
+        )->orderBy('anggota_keluarga.anakke', 'asc');
     }
 
     // Orang tua

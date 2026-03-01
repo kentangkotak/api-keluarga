@@ -22,3 +22,5 @@ Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
 // Ambil family tree berdasarkan root anggota
 Route::get('/family-tree', [PohonKeluargaController::class, 'tampil']);
 Route::post('/family-tree-simpan', [PohonKeluargaController::class, 'store']);
+
+Route::get('/cari-ortu', [PohonKeluargaController::class, 'cariortu']);
