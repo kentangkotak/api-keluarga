@@ -248,7 +248,7 @@ class PohonKeluargaController extends Controller
         $data = $request->validate([
             'id_anggota' => 'required|integer',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
-            'spouse_id' => 'required|integer',
+            'spouse_id' => 'nullable|integer',
             'photospouse' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
         $id_anggota = $data['id_anggota'];
