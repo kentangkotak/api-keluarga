@@ -246,12 +246,12 @@ class PohonKeluargaController extends Controller
     public function uploadfoto(Request $request)
     {
         $data = $request->validate([
-            'id_anggota' => 'required|integer',
+            'id_anggota' => 'nullable|integer',
             'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
             'spouse_id' => 'nullable|integer',
             'photospouse' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
-        $id_anggota = $data['id_anggota'];
+        $id_anggota = $data['id_anggota'] ?? null;
         $spouse_id = $data['spouse_id'] ?? null;
         $image = $request->file('photo');
         $imagespouse = $request->file('photospouse');
