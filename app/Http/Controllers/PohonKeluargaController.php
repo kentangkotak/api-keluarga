@@ -252,7 +252,7 @@ class PohonKeluargaController extends Controller
             'photospouse' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
         ]);
         $id_anggota = $data['id_anggota'];
-        $spouse_id = $data['spouse_id'];
+        $spouse_id = $data['spouse_id'] ?? null;
         $image = $request->file('photo');
         $imagespouse = $request->file('photospouse');
         $sftp = new SFTP('192.168.33.105', 22);
