@@ -24,3 +24,4 @@ Route::get('/family-tree', [PohonKeluargaController::class, 'tampil']);
 Route::post('/family-tree-simpan', [PohonKeluargaController::class, 'store']);
 
 Route::get('/cari-ortu', [PohonKeluargaController::class, 'cariortu']);
+Route::post('/upload-foto', [PohonKeluargaController::class, 'uploadfoto']);

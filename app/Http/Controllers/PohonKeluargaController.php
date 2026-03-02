@@ -7,6 +7,7 @@ use App\Models\Hubunganorangtua;
 use App\Models\Pernikahan;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use phpseclib3\Net\SFTP;
 
 class PohonKeluargaController extends Controller
 {
@@ -240,5 +241,77 @@ class PohonKeluargaController extends Controller
         )
         ->get();
         return response()->json($ortu);
+    }
+
+    public function uploadfoto(Request $request)
+    {
+        $data = $request->validate([
+            'id_anggota' => 'required|integer',
+            'photo' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+            'spouse_id' => 'required|integer',
+            'photospouse' => 'nullable|image|mimes:jpeg,png,jpg,gif,svg|max:2048',
+        ]);
+        $id_anggota = $data['id_anggota'];
+        $spouse_id = $data['spouse_id'];
+        $image = $request->file('photo');
+        $imagespouse = $request->file('photospouse');
+        $sftp = new SFTP('192.168.33.105', 22);
+        if($image){
+            $ext = $image->getClientOriginalExtension();
+            $name = time().'.'.$image->getClientOriginalExtension();
+            $folder = 'nasab/' . $id_anggota;
+
+            if (!$sftp->login('root', 'sasa0102')) {
+                throw new \Exception('Login failed');
+            }
+
+            $folder = '/www/wwwroot/storage/nasab/' . $id_anggota;
+            if (!$sftp->is_dir($folder)) {
+                $sftp->mkdir($folder, 0755, true);
+            }
+
+            $sftp->put("$folder/$name", file_get_contents($image));
+
+            $data['foto'] = 'https://nasab.udumbara.my.id/nasab/'.$id_anggota.'/'.$name;
+            $data['path'] = 'nasab/'.$id_anggota.'/'.$name;
+            AnggotaKeluarga::where('id', $id_anggota)->update(
+                [
+                    'foto' => $data['foto'],
+                    'path' => $data['path']
+                ]
+            );
+
+        }
+
+        if($imagespouse){
+            $ext = $imagespouse->getClientOriginalExtension();
+            $name = time().'.'.$imagespouse->getClientOriginalExtension();
+            $folder = 'nasab/' . $spouse_id;
+
+            if (!$sftp->login('root', 'sasa0102')) {
+                throw new \Exception('Login failed');
+            }
+
+            $folder = '/www/wwwroot/storage/nasab/' . $spouse_id;
+            if (!$sftp->is_dir($folder)) {
+                $sftp->mkdir($folder, 0755, true);
+            }
+
+            $sftp->put("$folder/$name", file_get_contents($imagespouse));
+
+            $data['foto'] = 'https://nasab.udumbara.my.id/nasab/'.$spouse_id.'/'.$name;
+            $data['path'] = 'nasab/'.$spouse_id.'/'.$name;
+            AnggotaKeluarga::where('id', $spouse_id)->update(
+                [
+                    'foto' =>$data['foto'],
+                    'path' => $data['path']
+                ]
+            );
+        }
+        return response()->json([
+            'success' => true,
+            'message' => 'Foto berhasil diunggah',
+            'data' => $name
+        ], 200);
     }
 }
