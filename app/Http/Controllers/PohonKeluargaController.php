@@ -258,21 +258,20 @@ class PohonKeluargaController extends Controller
                 $image = $request->file('photo');
                 $imagespouse = $request->file('photospouse');
                 $sftp = new SFTP('192.168.33.105', 22);
+                if (!$sftp->login('root', 'sasa0102')) {
+                    throw new \Exception('Login failed');
+                }
                 if($image){
                     $ext = $image->getClientOriginalExtension();
                     $name = time().'.'.$image->getClientOriginalExtension();
                     $folder = 'nasab/' . $id_anggota;
-
-                    if (!$sftp->login('root', 'sasa0102')) {
-                        throw new \Exception('Login failed');
-                    }
 
                     $folder = '/www/wwwroot/storage/nasab/' . $id_anggota;
                     if (!$sftp->is_dir($folder)) {
                         $sftp->mkdir($folder, 0755, true);
                     }
 
-                    $sftp->put("$folder/$name", file_get_contents($image));
+                    $sftp->put("$folder/$name", file_get_contents($image->getRealPath()));
 
                     $data['foto'] = 'https://nasab.udumbara.my.id/nasab/'.$id_anggota.'/'.$name;
                     $data['path'] = 'nasab/'.$id_anggota.'/'.$name;
@@ -290,16 +289,16 @@ class PohonKeluargaController extends Controller
                     $name = time().'.'.$imagespouse->getClientOriginalExtension();
                     $folder = 'nasab/' . $spouse_id;
 
-                    if (!$sftp->login('root', 'sasa0102')) {
-                        throw new \Exception('Login failed');
-                    }
+                    // if (!$sftp->login('root', 'sasa0102')) {
+                    //     throw new \Exception('Login failed');
+                    // }
 
                     $folder = '/www/wwwroot/storage/nasab/' . $spouse_id;
                     if (!$sftp->is_dir($folder)) {
                         $sftp->mkdir($folder, 0755, true);
                     }
 
-                    $sftp->put("$folder/$name", file_get_contents($imagespouse));
+                    $sftp->put("$folder/$name", file_get_contents($imagespouse->getRealPath()));
 
                     $data['foto'] = 'https://nasab.udumbara.my.id/nasab/'.$spouse_id.'/'.$name;
                     $data['path'] = 'nasab/'.$spouse_id.'/'.$name;
@@ -320,13 +319,17 @@ class PohonKeluargaController extends Controller
                     'data' => $tampil,
                     'ortu' => $cariortu
                 ], 200);
-            } catch (\Exception $e) {
-            DB::rollBack();
+        } catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'success' => false,
-                'message' => 'Terjadi kesalahan pada server',
-                'error' => $e->getMessage() // bisa dihapus kalau production
-            ], 500);
+                'message' => $e->errors()['photo'][0] ?? 'Validasi gagal'
+            ], 422);
+        }catch (\Exception $e) {
+            DB::rollBack();
+                return response()->json([
+                    'success' => false,
+                    'message' => $e->getMessage(), // 🔥 ambil error aslioduction
+                ], 500);
         }
     }
 }
